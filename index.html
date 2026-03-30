@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>휴일 자율학습 통합 관리 시스템</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+        body { font-family: 'Noto Sans KR', sans-serif; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .cal-day { transition: all 0.2s; }
+        .cal-day:hover { transform: translateY(-2px); }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900">
+
+    <!-- 헤더 영역 -->
+    <header class="bg-indigo-900 text-white p-6 shadow-xl sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-4">
+                <div class="bg-indigo-500 p-2 rounded-xl">
+                    <i data-lucide="cloud" class="w-7 h-7"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-black tracking-tight">자율학습 통합 관리 시스템</h1>
+                    <p class="text-emerald-300 text-[10px] font-bold uppercase tracking-widest mt-0.5" id="cloudStatusText">☁️ 클라우드 연결 중...</p>
+                </div>
+            </div>
+            <nav class="flex bg-white/10 rounded-xl p-1 border border-white/20">
+                <button onclick="window.switchTab('input')" id="tabBtn-input" class="px-5 py-2 rounded-lg text-sm font-bold transition-all bg-white text-indigo-900 shadow-lg">
+                    출석 입력
+                </button>
+                <button onclick="window.switchTab('stats')" id="tabBtn-stats" class="px-5 py-2 rounded-lg text-sm font-bold transition-all text-indigo-100 hover:text-white">
+                    누적 통계
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto p-6 md:p-10">
+        
+        <!-- ==================== [탭 1] 출석 입력 ==================== -->
+        <div id="tab-input" class="tab-content active">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <!-- 왼쪽 입력 폼 -->
+                <div class="lg:col-span-5 flex flex-col gap-6">
+                    
+                    <!-- ☁️ 클라우드 동기화 안내 패널 ☁️ -->
+                    <div class="bg-emerald-50 border-2 border-emerald-200 rounded-[2rem] p-6 shadow-sm relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 opacity-10"><i data-lucide="cloud-lightning" class="w-24 h-24 text-emerald-600"></i></div>
+                        <h2 class="text-base font-black text-emerald-900 mb-2 flex items-center gap-2 relative z-10">
+                            <i data-lucide="wifi" class="w-5 h-5 text-emerald-600"></i> 실시간 클라우드 동기화 켜짐
+                        </h2>
+                        <p class="text-[11px] text-emerald-700 font-bold leading-relaxed relative z-10">
+                            이제 입력되는 즉시 데이터가 <span class="bg-emerald-200 px-1 rounded text-emerald-900">서버에 안전하게 자동 저장</span>됩니다.<br/>
+                            링크를 공유받은 담당자님과 실시간으로 동일한 통계를 확인할 수 있습니다!
+                        </p>
+                    </div>
+
+                    <!-- 기존 입력 패널 -->
+                    <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 p-8">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-lg font-black text-slate-800 flex items-center gap-2">
+                                <i data-lucide="calendar" class="w-5 h-5 text-indigo-600"></i> 날짜 및 학번 입력
+                            </h2>
+                            <span id="displaySelectedDate" class="text-xs font-black text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full"></span>
+                        </div>
+                        
+                        <form id="attendanceForm" onsubmit="window.addRecord(event)" class="space-y-6">
+                            
+                            <!-- 인터랙티브 달력 -->
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                                <div class="flex justify-between items-center mb-4 px-2">
+                                    <button type="button" onclick="window.changeMonth(-1)" class="p-1 hover:bg-slate-200 rounded-lg transition-colors text-slate-500"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
+                                    <h3 id="cal-month-year" class="font-black text-slate-700">2026년 3월</h3>
+                                    <button type="button" onclick="window.changeMonth(1)" class="p-1 hover:bg-slate-200 rounded-lg transition-colors text-slate-500"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
+                                </div>
+                                <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-black text-slate-400 mb-2">
+                                    <div class="text-red-400">일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div class="text-blue-400">토</div>
+                                </div>
+                                <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center text-sm font-bold">
+                                    <!-- JS로 달력 자동 생성 -->
+                                </div>
+                            </div>
+
+                            <!-- 차수 선택 -->
+                            <div>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">학습 차수 (기간)</label>
+                                <div class="grid grid-cols-4 gap-2" id="roundButtons">
+                                    <button type="button" onclick="window.setRound(1)" id="btn-round-1" class="round-btn py-2.5 rounded-xl border-2 text-xs font-black transition-all bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-100">1차</button>
+                                    <button type="button" onclick="window.setRound(2)" id="btn-round-2" class="round-btn py-2.5 rounded-xl border-2 text-xs font-black transition-all bg-white border-slate-200 text-slate-400 hover:border-indigo-300">2차</button>
+                                    <button type="button" onclick="window.setRound(3)" id="btn-round-3" class="round-btn py-2.5 rounded-xl border-2 text-xs font-black transition-all bg-white border-slate-200 text-slate-400 hover:border-indigo-300">3차</button>
+                                    <button type="button" onclick="window.setRound(4)" id="btn-round-4" class="round-btn py-2.5 rounded-xl border-2 text-xs font-black transition-all bg-white border-slate-200 text-slate-400 hover:border-indigo-300">4차</button>
+                                </div>
+                            </div>
+
+                            <!-- 학번 입력 -->
+                            <div>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">학생 학번 입력 후 [Enter]</label>
+                                <div class="relative">
+                                    <i data-lucide="hash" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+                                    <input type="text" id="inputId" placeholder="학번 5자리 (예: 20307)" oninput="window.checkStudentId()" autocomplete="off" class="w-full pl-12 pr-4 py-4 bg-white border-2 border-slate-200 rounded-2xl font-mono text-lg font-black outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all shadow-sm">
+                                </div>
+                            </div>
+
+                            <!-- 이름 자동 표시 -->
+                            <div class="bg-slate-900 rounded-2xl p-5 text-center shadow-inner relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500"></div>
+                                <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1 block">조회된 성명</span>
+                                <p id="displayName" class="text-3xl font-black text-slate-700 tracking-tight transition-colors">학생 없음</p>
+                            </div>
+
+                            <button type="submit" id="submitBtn" disabled class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-lg hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 transition-all shadow-xl shadow-indigo-100 active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+                                <i data-lucide="cloud-upload" class="w-5 h-5"></i> 클라우드에 기록하기
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 오른쪽 최근 기록 리스트 -->
+                <div class="lg:col-span-7">
+                    <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full">
+                        <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                            <h2 class="text-lg font-black text-slate-800 flex items-center gap-2">
+                                <i data-lucide="list-checks" class="w-5 h-5 text-indigo-600"></i> 클라우드 누적 기록
+                            </h2>
+                            <span id="totalRecordsCount" class="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">총 0건</span>
+                        </div>
+                        <div class="overflow-x-auto flex-1 max-h-[850px] overflow-y-auto">
+                            <table class="w-full text-left">
+                                <thead class="bg-white sticky top-0 z-10 shadow-sm">
+                                    <tr class="border-b border-slate-100">
+                                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">날짜(요일)</th>
+                                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">차수</th>
+                                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">학번</th>
+                                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">이름</th>
+                                        <th class="px-6 py-4 text-right"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="attendanceList" class="divide-y divide-slate-50">
+                                    <!-- 실시간 연동됨 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== [탭 2] 누적 통계 ==================== -->
+        <div id="tab-stats" class="tab-content">
+            <div class="space-y-8">
+                <!-- 상단 필터 및 내보내기 -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div>
+                        <h2 class="text-2xl font-black text-slate-900">자습 참여 누적 통계</h2>
+                        <p class="text-slate-500 text-sm font-bold">서버에 안전하게 보관된 데이터를 바탕으로 분석합니다.</p>
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row items-center gap-3">
+                        <div class="flex bg-white p-1 rounded-xl shadow-sm border border-slate-200" id="filterButtons">
+                            <button onclick="window.setFilter('all')" id="filter-all" class="filter-btn px-4 py-2 rounded-lg text-xs font-black transition-all bg-indigo-600 text-white shadow-md">통합 누적</button>
+                            <button onclick="window.setFilter(1)" id="filter-1" class="filter-btn px-4 py-2 rounded-lg text-xs font-black transition-all text-slate-500 hover:bg-slate-50">1차</button>
+                            <button onclick="window.setFilter(2)" id="filter-2" class="filter-btn px-4 py-2 rounded-lg text-xs font-black transition-all text-slate-500 hover:bg-slate-50">2차</button>
+                            <button onclick="window.setFilter(3)" id="filter-3" class="filter-btn px-4 py-2 rounded-lg text-xs font-black transition-all text-slate-500 hover:bg-slate-50">3차</button>
+                            <button onclick="window.setFilter(4)" id="filter-4" class="filter-btn px-4 py-2 rounded-lg text-xs font-black transition-all text-slate-500 hover:bg-slate-50">4차</button>
+                        </div>
+                        
+                        <button onclick="window.exportToExcel()" class="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-black shadow-md hover:bg-emerald-700 transition-all active:scale-95">
+                            <i data-lucide="table" class="w-4 h-4"></i> 통계표(엑셀) 저장
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 요약 카드 -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200">
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">총 누적 기록</span>
+                        <p class="text-4xl font-black text-indigo-600"><span id="statTotalCount">0</span><small class="text-base ml-1 text-slate-400">회</small></p>
+                    </div>
+                    <div class="bg-indigo-600 p-8 rounded-[2rem] shadow-xl text-white md:col-span-2 flex items-center gap-6 relative overflow-hidden">
+                        <div class="absolute -right-10 -top-10 opacity-10">
+                            <i data-lucide="award" class="w-40 h-40"></i>
+                        </div>
+                        <div class="bg-white/20 p-4 rounded-2xl shadow-inner backdrop-blur-sm relative z-10">
+                            <i data-lucide="trophy" class="w-8 h-8 text-yellow-300"></i>
+                        </div>
+                        <div class="relative z-10">
+                            <span id="statTopTitle" class="text-[10px] font-black text-indigo-200 uppercase tracking-widest block mb-1">최다 참여 우수 학생</span>
+                            <div class="flex items-baseline gap-3">
+                                <p id="statTopName" class="text-3xl font-black">-</p>
+                                <p id="statTopDesc" class="text-indigo-200 font-bold bg-indigo-800/50 px-3 py-1 rounded-full text-xs">누적 0회 달성!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 랭킹 테이블 -->
+                <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="bg-slate-50/50 border-b border-slate-100">
+                                    <th class="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">종합 순위</th>
+                                    <th class="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">학번</th>
+                                    <th class="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">이름</th>
+                                    <th class="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">누적 참여 횟수</th>
+                                    <th class="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">참여 성실도</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rankingList" class="divide-y divide-slate-100">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 🔥 Firebase 모듈을 사용한 JavaScript 스크립트 🔥 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // ==========================================
+        // 1. Firebase 및 환경 초기화
+        // ==========================================
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'holiday-study-manager-app';
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // ==========================================
+        // 2. 285명 학생 데이터베이스 내장
+        // ==========================================
+        const rawStudentData = `
+10101	권기백
+10102	김이현
+10103	박어진
+10104	설호승
+10105	안건호
+10106	안성민
+10107	여완
+10108	유상우
+10109	윤도현
+10110	이시환
+10111	이유찬
+10112	임채오
+10113	정성원
+10114	정시윤
+10115	조재민
+10116	최원우
+10117	황명원
+10201	권재용
+10202	김도원
+10203	김도현
+10204	김동현
+10205	김유찬
+10206	김윤하
+10207	김태영
+10208	김태진
+10209	김현진
+10210	남휘승
+10211	노현민
+10212	박현민
+10213	손성민
+10214	양지승
+10215	유주영
+10216	윤단우
+10217	윤인성
+10218	이성재
+10301	강준서
+10302	길유빈
+10303	김건
+20304	김윤우
+20305	김재훈
+20306	김주원
+20307	이선교
+20308	이준서
+20309	전태율
+20310	전하승
+20311	전현성
+20312	최찬영
+20313	한성훈
+20314	허주원
+20401	강예범
+20402	강지호
+20403	김강산
+20404	김민찬
+20405	김지원
+20406	박규민
+20407	박준희
+20408	박현준
+20409	백승준
+20410	변석주
+20411	이승민
+20412	장성호
+20413	최성인
+20414	최현서
+20501	강우현
+20502	김준수
+20503	김태형
+20504	안경준
+20505	양성율
+20506	양성훈
+20507	이민우
+20508	이선우
+20509	이윤호
+20510	이진성
+20511	조성건
+20512	조태규
+20513	최준성
+20601	권현우
+20602	김다니엘
+20603	김시훈
+20604	김진민
+20605	박산하
+20606	박시현
+20607	심승연
+20608	이시후
+20609	이준범
+20610	이현승
+        `;
+
+        const studentDB = {};
+        rawStudentData.trim().split('\n').forEach(line => {
+            const parts = line.trim().split(/\s+/);
+            if (parts.length >= 2 && /^\d+$/.test(parts[0])) {
+                studentDB[parts[0]] = parts[1];
+            }
+        });
+
+        // ==========================================
+        // 3. 전역 상태
+        // ==========================================
+        let currentRound = 1;
+        let statsFilter = 'all';
+        let attendanceData = [];
+        let currentFoundName = "";
+        
+        let calCurrentDate = new Date();
+        let calSelectedDate = new Date(); 
+
+        // ==========================================
+        // 4. 앱 초기화 및 클라우드 연동 (Firestore)
+        // ==========================================
+        window.onload = async () => {
+            lucide.createIcons();
+            window.renderCalendar();
+            
+            // 인증 진행
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("인증 에러:", error);
+                document.getElementById('cloudStatusText').textContent = "오프라인 모드 🔴";
+            }
+        };
+
+        // 로그인 상태 감지 및 데이터 실시간 수신!
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('cloudStatusText').textContent = "🟢 실시간 동기화 켜짐";
+                
+                // Firestore의 공유 컬렉션 (모든 접속자가 같은 데이터를 봅니다)
+                const collRef = collection(db, 'artifacts', appId, 'public', 'data', 'holiday_attendance');
+                
+                // 입력 즉시, 혹은 다른 담당자가 입력 즉시 호출됨
+                onSnapshot(collRef, (snapshot) => {
+                    attendanceData = [];
+                    snapshot.forEach(doc => {
+                        attendanceData.push({ dbId: doc.id, ...doc.data() });
+                    });
+                    
+                    // 최신 입력순으로 정렬
+                    attendanceData.sort((a, b) => b.timestamp - a.timestamp);
+                    
+                    // 화면 자동 업데이트
+                    window.renderInputList();
+                    window.renderStats();
+                }, (error) => {
+                    console.error("데이터 읽기 에러:", error);
+                });
+            }
+        });
+
+        // ==========================================
+        // 5. 로직 함수 (html 속성 호출을 위해 window 객체에 할당)
+        // ==========================================
+        
+        window.changeMonth = (delta) => {
+            calCurrentDate.setMonth(calCurrentDate.getMonth() + delta);
+            window.renderCalendar();
+        };
+
+        window.selectDate = (year, month, date) => {
+            calSelectedDate = new Date(year, month, date);
+            window.renderCalendar();
+            document.getElementById('inputId').focus();
+        };
+
+        window.renderCalendar = () => {
+            const year = calCurrentDate.getFullYear();
+            const month = calCurrentDate.getMonth();
+            
+            document.getElementById('cal-month-year').textContent = `${year}년 ${month + 1}월`;
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const lastDate = new Date(year, month + 1, 0).getDate();
+            
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+            
+            for (let i = 0; i < firstDay; i++) {
+                grid.innerHTML += `<div class="p-2"></div>`;
+            }
+            
+            for (let i = 1; i <= lastDate; i++) {
+                const iterDate = new Date(year, month, i);
+                const isSelected = iterDate.toDateString() === calSelectedDate.toDateString();
+                const isToday = iterDate.toDateString() === new Date().toDateString();
+                
+                let textColor = "text-slate-700";
+                if (iterDate.getDay() === 0) textColor = "text-red-500";
+                if (iterDate.getDay() === 6) textColor = "text-blue-500";
+                
+                let classes = `cal-day p-2 rounded-xl cursor-pointer flex items-center justify-center transition-all ${textColor} hover:bg-indigo-100 hover:text-indigo-700`;
+                
+                if (isSelected) {
+                    classes = `cal-day p-2 rounded-xl cursor-pointer flex items-center justify-center font-black bg-indigo-600 text-white shadow-md transform scale-105`;
+                } else if (isToday) {
+                    classes += ` border-2 border-indigo-200`;
+                }
+
+                grid.innerHTML += `<div class="${classes}" onclick="window.selectDate(${year}, ${month}, ${i})">${i}</div>`;
+            }
+            
+            window.updateDisplaySelectedDate();
+        };
+
+        window.updateDisplaySelectedDate = () => {
+            const y = calSelectedDate.getFullYear();
+            const m = String(calSelectedDate.getMonth() + 1).padStart(2, '0');
+            const d = String(calSelectedDate.getDate()).padStart(2, '0');
+            const days = ['일', '월', '화', '수', '목', '금', '토'];
+            const dayStr = days[calSelectedDate.getDay()];
+            
+            document.getElementById('displaySelectedDate').textContent = `${y}-${m}-${d} (${dayStr})`;
+        };
+
+        window.switchTab = (tab) => {
+            document.getElementById('tab-input').classList.remove('active');
+            document.getElementById('tab-stats').classList.remove('active');
+            document.getElementById('tabBtn-input').className = "px-5 py-2 rounded-lg text-sm font-bold transition-all bg-transparent text-indigo-100 hover:text-white";
+            document.getElementById('tabBtn-stats').className = "px-5 py-2 rounded-lg text-sm font-bold transition-all bg-transparent text-indigo-100 hover:text-white";
+
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            document.getElementById(`tabBtn-${tab}`).className = "px-5 py-2 rounded-lg text-sm font-bold transition-all bg-white text-indigo-900 shadow-lg";
+            
+            if (tab === 'stats') window.renderStats();
+        };
+
+        window.setRound = (round) => {
+            currentRound = round;
+            const buttons = document.querySelectorAll('.round-btn');
+            buttons.forEach(btn => {
+                btn.className = "round-btn py-2.5 rounded-xl border-2 text-xs font-black transition-all bg-white border-slate-200 text-slate-400 hover:border-indigo-300";
+            });
+            const activeBtn = document.getElementById(`btn-round-${round}`);
+            activeBtn.className = "round-btn py-2.5 rounded-xl border-2 text-xs font-black transition-all bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-100";
+            document.getElementById('inputId').focus();
+        };
+
+        window.setFilter = (filter) => {
+            statsFilter = filter;
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => {
+                btn.className = "filter-btn px-4 py-2 rounded-lg text-xs font-black transition-all text-slate-500 hover:bg-slate-50";
+            });
+            const activeBtn = document.getElementById(`filter-${filter}`);
+            activeBtn.className = "filter-btn px-4 py-2 rounded-lg text-xs font-black transition-all bg-indigo-600 text-white shadow-md";
+            window.renderStats();
+        };
+
+        window.checkStudentId = () => {
+            const inputId = document.getElementById('inputId').value.trim();
+            const displayName = document.getElementById('displayName');
+            const submitBtn = document.getElementById('submitBtn');
+
+            currentFoundName = studentDB[inputId] || "";
+
+            if (currentFoundName) {
+                displayName.textContent = currentFoundName;
+                displayName.className = "text-3xl font-black text-white tracking-tight transition-colors";
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('disabled:bg-slate-200', 'disabled:text-slate-400');
+            } else {
+                displayName.textContent = "학생 없음";
+                displayName.className = "text-3xl font-black text-slate-700 tracking-tight transition-colors";
+                submitBtn.disabled = true;
+                submitBtn.classList.add('disabled:bg-slate-200', 'disabled:text-slate-400');
+            }
+        };
+
+        // 클라우드(Firestore)에 데이터 저장!
+        window.addRecord = async (event) => {
+            event.preventDefault();
+            const inputId = document.getElementById('inputId').value.trim();
+            if (!currentFoundName || !auth.currentUser) return;
+
+            const y = calSelectedDate.getFullYear();
+            const m = String(calSelectedDate.getMonth() + 1).padStart(2, '0');
+            const d = String(calSelectedDate.getDate()).padStart(2, '0');
+            const days = ['일', '월', '화', '수', '목', '금', '토'];
+            const dayStr = days[calSelectedDate.getDay()];
+            const displayDate = `${y}-${m}-${d}(${dayStr})`;
+
+            const record = {
+                timestamp: Date.now(), // 정렬을 위해 저장
+                round: currentRound,
+                date: displayDate,
+                studentId: inputId,
+                name: currentFoundName
+            };
+
+            try {
+                // Firebase Firestore에 새 문서 추가 (입력 즉시 업로드)
+                const docRef = doc(collection(db, 'artifacts', appId, 'public', 'data', 'holiday_attendance'));
+                await setDoc(docRef, record);
+
+                // UI 리셋 효과
+                document.getElementById('inputId').value = "";
+                window.checkStudentId();
+                
+                const btn = document.getElementById('submitBtn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = `<i data-lucide="check" class="w-5 h-5"></i> 클라우드 저장 완료!`;
+                btn.classList.add('bg-emerald-500');
+                lucide.createIcons();
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('bg-emerald-500');
+                    lucide.createIcons();
+                    document.getElementById('inputId').focus();
+                }, 500);
+
+            } catch (error) {
+                alert("클라우드 저장 중 에러가 발생했습니다.");
+                console.error(error);
+            }
+        };
+
+        // 클라우드(Firestore)에서 데이터 삭제!
+        window.deleteRecord = async (dbId) => {
+            if (confirm('이 기록을 클라우드에서 완전히 삭제하시겠습니까?')) {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'holiday_attendance', dbId));
+                } catch (error) {
+                    alert("삭제 중 에러가 발생했습니다.");
+                }
+            }
+        };
+
+        window.renderInputList = () => {
+            const tbody = document.getElementById('attendanceList');
+            document.getElementById('totalRecordsCount').textContent = `총 ${attendanceData.length}건`;
+            tbody.innerHTML = "";
+
+            if (attendanceData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-32 text-center text-slate-300 font-bold">등록된 기록이 없습니다.<br><span class="text-xs font-normal">달력에서 날짜를 선택하고 학번을 입력하세요.</span></td></tr>`;
+                return;
+            }
+
+            attendanceData.forEach(item => {
+                let badgeClass = "bg-white border-slate-200 text-slate-500";
+                if (item.round == 1) badgeClass = "bg-indigo-100 border-indigo-200 text-indigo-700";
+                if (item.round == 2) badgeClass = "bg-purple-100 border-purple-200 text-purple-700";
+                if (item.round == 3) badgeClass = "bg-amber-100 border-amber-200 text-amber-700";
+                if (item.round == 4) badgeClass = "bg-emerald-100 border-emerald-200 text-emerald-700";
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-indigo-50/30 transition-colors group";
+                tr.innerHTML = `
+                    <td class="px-6 py-4 text-xs font-bold text-slate-600">${item.date}</td>
+                    <td class="px-6 py-4 font-bold text-xs">
+                        <span class="px-2 py-0.5 rounded border ${badgeClass}">${item.round}차</span>
+                    </td>
+                    <td class="px-6 py-4 font-mono text-sm text-slate-700">${item.studentId}</td>
+                    <td class="px-6 py-4 font-black text-slate-900">${item.name}</td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="window.deleteRecord('${item.dbId}')" class="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            lucide.createIcons();
+        };
+
+        window.renderStats = () => {
+            const filteredData = statsFilter === 'all' 
+                ? attendanceData 
+                : attendanceData.filter(a => String(a.round) === String(statsFilter));
+
+            const counts = {};
+            filteredData.forEach(item => {
+                if (!counts[item.studentId]) {
+                    counts[item.studentId] = { id: item.studentId, name: item.name, count: 0 };
+                }
+                counts[item.studentId].count += 1;
+            });
+
+            const sortedStats = Object.values(counts).sort((a, b) => b.count - a.count);
+            const topCount = sortedStats.length > 0 ? sortedStats[0].count : 1; 
+
+            document.getElementById('statTotalCount').textContent = filteredData.length;
+            document.getElementById('statTopTitle').textContent = `${statsFilter === 'all' ? '통합' : statsFilter + '차'} 종합 1위 학생`;
+            
+            if (sortedStats.length > 0) {
+                document.getElementById('statTopName').textContent = sortedStats[0].name;
+                document.getElementById('statTopDesc').innerHTML = `무려 <span class="text-yellow-300">${sortedStats[0].count}회</span> 출석 달성!`;
+            } else {
+                document.getElementById('statTopName').textContent = "-";
+                document.getElementById('statTopDesc').textContent = "누적 0회 달성!";
+            }
+
+            const tbody = document.getElementById('rankingList');
+            tbody.innerHTML = "";
+
+            if (sortedStats.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-40 text-center text-slate-300 font-bold">누적된 통계 데이터가 없습니다.</td></tr>`;
+                return;
+            }
+
+            sortedStats.forEach((s, index) => {
+                let badgeClass = "text-slate-400 bg-slate-50 border border-slate-200";
+                if (index === 0) badgeClass = "bg-yellow-400 text-white shadow-md shadow-yellow-200 scale-110";
+                else if (index === 1) badgeClass = "bg-slate-300 text-white shadow-md";
+                else if (index === 2) badgeClass = "bg-orange-300 text-white shadow-md";
+
+                const percentage = Math.round((s.count / topCount) * 100);
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition-colors";
+                tr.innerHTML = `
+                    <td class="px-10 py-6">
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-xl font-black text-xs transition-transform ${badgeClass}">
+                            ${index + 1}
+                        </span>
+                    </td>
+                    <td class="px-10 py-6 font-mono text-sm text-slate-500 font-bold">${s.id}</td>
+                    <td class="px-10 py-6 font-black text-slate-900 text-lg">${s.name}</td>
+                    <td class="px-10 py-6">
+                        <div class="flex items-baseline gap-1">
+                            <span class="font-black text-indigo-600 text-2xl">${s.count}</span>
+                            <span class="text-[10px] text-slate-400 font-black">회</span>
+                        </div>
+                    </td>
+                    <td class="px-10 py-6 min-w-[200px]">
+                        <div class="flex items-center gap-3">
+                            <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden shadow-inner">
+                                <div class="h-full rounded-full transition-all duration-1000 ease-out ${index < 3 ? 'bg-indigo-500' : 'bg-slate-300'}" style="width: ${percentage}%"></div>
+                            </div>
+                            <span class="text-[10px] font-black text-slate-400 w-8">${percentage}%</span>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        };
+
+        window.exportToExcel = () => {
+            const filteredData = statsFilter === 'all' 
+                ? attendanceData 
+                : attendanceData.filter(a => String(a.round) === String(statsFilter));
+
+            if (filteredData.length === 0) {
+                alert("내보낼 통계 데이터가 없습니다.");
+                return;
+            }
+
+            const counts = {};
+            filteredData.forEach(item => {
+                if (!counts[item.studentId]) {
+                    counts[item.studentId] = { id: item.studentId, name: item.name, count: 0 };
+                }
+                counts[item.studentId].count += 1;
+            });
+            const sortedStats = Object.values(counts).sort((a, b) => b.count - a.count);
+
+            const headers = ['종합 순위', '학번', '이름', '누적 참여 횟수'];
+            const rows = sortedStats.map((s, index) => [index + 1, s.id, s.name, s.count]);
+
+            const csvContent = '\uFEFF' + [
+                headers.join(','),
+                ...rows.map(r => r.join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            const fileName = statsFilter === 'all' ? '전체_통합_자습통계.csv' : `${statsFilter}차_자습통계.csv`;
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+    </script>
+</body>
+</html>
