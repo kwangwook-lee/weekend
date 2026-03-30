@@ -516,11 +516,14 @@
 30709,이재원
 30710,이태윤
 30711,임성빈
-30712,조남훈 `;
+30712,조남훈
+// 필요시 엑셀에서 명단을 추가로 덮어쓰기 하시면 됩니다. (쉼표, 띄어쓰기, 탭 모두 자동인식)
+        `;
 
         const studentDB = {};
         rawStudentData.trim().split('\n').forEach(line => {
-            const parts = line.trim().split(/\s+/);
+            // 정규표현식 수정: 쉼표(,) 혹은 공백(탭, 띄어쓰기)을 모두 구분자로 인식하도록 변경
+            const parts = line.trim().split(/[,\s]+/);
             if (parts.length >= 2 && /^\d+$/.test(parts[0])) {
                 studentDB[parts[0]] = parts[1];
             }
