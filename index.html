@@ -18,7 +18,6 @@
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-900">
 
-    <!-- 헤더 영역 -->
     <header class="bg-indigo-900 text-white p-6 shadow-xl sticky top-0 z-50">
         <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
             <div class="flex items-center gap-4">
@@ -43,26 +42,22 @@
 
     <main class="max-w-6xl mx-auto p-6 md:p-10">
         
-        <!-- ==================== [탭 1] 출석 입력 ==================== -->
         <div id="tab-input" class="tab-content active">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 
-                <!-- 왼쪽 입력 폼 -->
                 <div class="lg:col-span-5 flex flex-col gap-6">
                     
-                    <!-- ☁️ 클라우드 동기화 안내 패널 ☁️ -->
                     <div class="bg-emerald-50 border-2 border-emerald-200 rounded-[2rem] p-6 shadow-sm relative overflow-hidden">
                         <div class="absolute -right-4 -top-4 opacity-10"><i data-lucide="cloud-lightning" class="w-24 h-24 text-emerald-600"></i></div>
                         <h2 class="text-base font-black text-emerald-900 mb-2 flex items-center gap-2 relative z-10">
                             <i data-lucide="wifi" class="w-5 h-5 text-emerald-600"></i> 실시간 클라우드 동기화 켜짐
                         </h2>
                         <p class="text-[11px] text-emerald-700 font-bold leading-relaxed relative z-10">
-                            이제 입력되는 즉시 데이터가 <span class="bg-emerald-200 px-1 rounded text-emerald-900">서버에 안전하게 자동 저장</span>됩니다.<br/>
-                            링크를 공유받은 담당자님과 실시간으로 동일한 통계를 확인할 수 있습니다!
+                            이제 입력되는 즉시 데이터가 <span class="bg-emerald-200 px-1 rounded text-emerald-900">선생님의 전용 서버(weekend)에 안전하게 자동 저장</span>됩니다.<br/>
+                            링크를 공유받은 담당자님과 실시간으로 동일한 데이터를 공유합니다!
                         </p>
                     </div>
 
-                    <!-- 기존 입력 패널 -->
                     <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 p-8">
                         <div class="flex justify-between items-center mb-6">
                             <h2 class="text-lg font-black text-slate-800 flex items-center gap-2">
@@ -73,7 +68,6 @@
                         
                         <form id="attendanceForm" onsubmit="window.addRecord(event)" class="space-y-6">
                             
-                            <!-- 인터랙티브 달력 -->
                             <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
                                 <div class="flex justify-between items-center mb-4 px-2">
                                     <button type="button" onclick="window.changeMonth(-1)" class="p-1 hover:bg-slate-200 rounded-lg transition-colors text-slate-500"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
@@ -84,11 +78,9 @@
                                     <div class="text-red-400">일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div class="text-blue-400">토</div>
                                 </div>
                                 <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center text-sm font-bold">
-                                    <!-- JS로 달력 자동 생성 -->
-                                </div>
+                                    </div>
                             </div>
 
-                            <!-- 차수 선택 -->
                             <div>
                                 <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">학습 차수 (기간)</label>
                                 <div class="grid grid-cols-4 gap-2" id="roundButtons">
@@ -99,7 +91,6 @@
                                 </div>
                             </div>
 
-                            <!-- 학번 입력 -->
                             <div>
                                 <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">학생 학번 입력 후 [Enter]</label>
                                 <div class="relative">
@@ -108,7 +99,6 @@
                                 </div>
                             </div>
 
-                            <!-- 이름 자동 표시 -->
                             <div class="bg-slate-900 rounded-2xl p-5 text-center shadow-inner relative overflow-hidden">
                                 <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500"></div>
                                 <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1 block">조회된 성명</span>
@@ -122,7 +112,6 @@
                     </div>
                 </div>
 
-                <!-- 오른쪽 최근 기록 리스트 -->
                 <div class="lg:col-span-7">
                     <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full">
                         <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
@@ -143,8 +132,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="attendanceList" class="divide-y divide-slate-50">
-                                    <!-- 실시간 연동됨 -->
-                                </tbody>
+                                    </tbody>
                             </table>
                         </div>
                     </div>
@@ -152,10 +140,8 @@
             </div>
         </div>
 
-        <!-- ==================== [탭 2] 누적 통계 ==================== -->
         <div id="tab-stats" class="tab-content">
             <div class="space-y-8">
-                <!-- 상단 필터 및 내보내기 -->
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
                         <h2 class="text-2xl font-black text-slate-900">자습 참여 누적 통계</h2>
@@ -177,7 +163,6 @@
                     </div>
                 </div>
 
-                <!-- 요약 카드 -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200">
                         <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">총 누적 기록</span>
@@ -200,7 +185,6 @@
                     </div>
                 </div>
 
-                <!-- 랭킹 테이블 -->
                 <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left">
@@ -222,17 +206,24 @@
         </div>
     </main>
 
-    <!-- 🔥 Firebase 모듈을 사용한 JavaScript 스크립트 🔥 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==========================================
-        // 1. Firebase 및 환경 초기화
+        // 1. Firebase 전용 환경 초기화
+        // 선생님께서 알려주신 데이터베이스를 연결합니다.
         // ==========================================
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'holiday-study-manager-app';
+        const firebaseConfig = {
+            apiKey: "AIzaSyD4cBYgM3Ex3ptbTrNFuK9crkADWOhja9g",
+            authDomain: "weekend-6a742.firebaseapp.com",
+            projectId: "weekend-6a742",
+            storageBucket: "weekend-6a742.firebasestorage.app",
+            messagingSenderId: "988056399089",
+            appId: "1:988056399089:web:fc20156613d82ca3554d50",
+            measurementId: "G-XZTT58E0B4"
+        };
         
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -242,93 +233,290 @@
         // 2. 285명 학생 데이터베이스 내장
         // ==========================================
         const rawStudentData = `
-10101	권기백
-10102	김이현
-10103	박어진
-10104	설호승
-10105	안건호
-10106	안성민
-10107	여완
-10108	유상우
-10109	윤도현
-10110	이시환
-10111	이유찬
-10112	임채오
-10113	정성원
-10114	정시윤
-10115	조재민
-10116	최원우
-10117	황명원
-10201	권재용
-10202	김도원
-10203	김도현
-10204	김동현
-10205	김유찬
-10206	김윤하
-10207	김태영
-10208	김태진
-10209	김현진
-10210	남휘승
-10211	노현민
-10212	박현민
-10213	손성민
-10214	양지승
-10215	유주영
-10216	윤단우
-10217	윤인성
-10218	이성재
-10301	강준서
-10302	길유빈
-10303	김건
-20304	김윤우
-20305	김재훈
-20306	김주원
-20307	이선교
-20308	이준서
-20309	전태율
-20310	전하승
-20311	전현성
-20312	최찬영
-20313	한성훈
-20314	허주원
-20401	강예범
-20402	강지호
-20403	김강산
-20404	김민찬
-20405	김지원
-20406	박규민
-20407	박준희
-20408	박현준
-20409	백승준
-20410	변석주
-20411	이승민
-20412	장성호
-20413	최성인
-20414	최현서
-20501	강우현
-20502	김준수
-20503	김태형
-20504	안경준
-20505	양성율
-20506	양성훈
-20507	이민우
-20508	이선우
-20509	이윤호
-20510	이진성
-20511	조성건
-20512	조태규
-20513	최준성
-20601	권현우
-20602	김다니엘
-20603	김시훈
-20604	김진민
-20605	박산하
-20606	박시현
-20607	심승연
-20608	이시후
-20609	이준범
-20610	이현승
-        `;
+10101,권기백
+10102,김이현
+10103,박어진
+10104,설호승
+10105,안건호
+10106,안성민
+10107,여완
+10108,유상우
+10109,윤도현
+10110,이시환
+10111,이유찬
+10112,임채오
+10113,정성원
+10114,정시윤
+10115,조재민
+10116,최원우
+10117,황명원
+10201,권재용
+10202,김도원
+10203,김도현
+10204,김동현
+10205,김유찬
+10206,김윤하
+10207,김태영
+10208,김태진
+10209,김현진
+10210,남휘승
+10211,노현민
+10212,박현민
+10213,손성민
+10214,양지승
+10215,유주영
+10216,윤단우
+10217,윤인성
+10218,이성재
+10301,강준서
+10302,길유빈
+10303,김건희
+10304,김대현
+10305,명예한
+10306,박민규
+10307,박준성
+10308,서정진
+10309,성진우
+10310,신인욱
+10311,심지훈
+10312,안정민
+10313,여태규
+10314,이경민
+10315,이우현
+10316,이준혁
+10317,장인호
+10318,최원호
+10401,구영은
+10402,권영찬
+10403,김도훈
+10404,김동준
+10405,김명진
+10406,김세원
+10407,김영준
+10408,나희성
+10409,민승기
+10410,박성민
+10411,박현수
+10412,변상호
+10413,왕건희
+10414,이재원
+10415,이정우
+10416,전성우
+10417,황현승
+10501,강규현
+10502,강민성
+10503,김대영
+10504,김준모
+10505,박준우
+10506,변준우
+10507,송현승
+10508,심윤우
+10509,양시우
+10510,유가온
+10511,유정민
+10512,이승원
+10513,이예성
+10514,이호찬
+10515,정민우
+10516,정희윤
+10517,조혜강
+10518,최진영
+10601,강성찬
+10602,김도훈
+10603,김재원
+10604,김준형
+10605,김지우
+10606,김지원
+10607,박준하
+10609,양윤제
+10610,엄규연
+10611,육건우
+10612,이규빈
+10613,장도윤
+10614,장석준
+10615,전상빈
+10616,정결
+10617,하주원
+10618,한승민
+20101,강동훈
+20102,김강민
+20103,김상헌
+20104,김준휘
+20105,문채준
+20106,박민재
+20107,방수한
+20108,신주환
+20109,안지승
+20110,오윤건
+20111,이우진
+20112,정희승
+20113,홍성훈
+20201,김민준
+20202,김언수
+20203,박성원
+20204,박재영
+20205,박지후
+20206,박형영
+20207,송지호
+20208,송찬우
+20209,원선우
+20210,윤지형
+20211,이도은
+20212,이민규
+20213,이승민
+20301,권용희
+20302,김근우
+20303,김민건
+20304,김윤우
+20305,김재훈
+20306,김주원
+20307,이선교
+20308,이준서
+20309,전태율
+20310,전하승
+20311,전현성
+20312,최찬영
+20313,한성훈
+20314,허주원
+20401,강예범
+20402,강지호
+20403,김강산
+20404,김민찬
+20405,김지원
+20406,박규민
+20407,박준희
+20408,박현준
+20409,백승준
+20410,변석주
+20411,이승민
+20412,장성호
+20413,최성인
+20414,최현서
+20501,강우현
+20502,김준수
+20503,김태형
+20504,안경준
+20505,양성율
+20506,양성훈
+20507,이민우
+20508,이선우
+20509,이윤호
+20510,이진성
+20511,조성건
+20512,조태규
+20513,최준성
+20601,권현우
+20602,김다니엘
+20603,김시훈
+20604,김진민
+20605,박산하
+20606,박시현
+20607,심승연
+20608,이시후
+20609,이준범
+20610,이현승
+20611,이현준
+20612,임찬호
+20613,장정우
+20614,최석현
+20701,강기연
+20702,강민준
+20703,김미종
+20704,김지윤
+20705,류주원
+20706,류현우
+20707,박한진
+20708,양지우
+20709,이도경
+20710,이충희
+20711,정은우
+20712,주은빈
+20713,진현세
+30101,김재환
+30102,박예찬
+30103,박재원
+30104,손재민
+30105,이원준
+30106,이윤건
+30107,이정민
+30108,장윤성
+30109,정시환
+30110,조민오
+30111,최문경
+30112,최현
+30201,김민섭
+30202,김지훈
+30203,우형민
+30204,육현우
+30205,윤동완
+30206,이연우
+30207,이윤우
+30208,이의준
+30209,이재빈
+30210,조민수
+30211,최준호
+30212,김성훈
+30301,김규혁
+30302,김도완
+30303,김도훈
+30304,서민준
+30305,신민기
+30306,위정현
+30307,이승현
+30308,이윤호
+30309,이준서
+30310,정인하
+30311,정현오
+30312,주어진
+30401,고예성
+30402,김도균
+30403,김도현
+30404,김민성
+30405,김서준
+30406,김우민
+30407,문승현
+30408,이남권
+30409,정민규
+30410,정승재
+30411,차재윤
+30412,황정민
+30501,구민서
+30502,김도훈
+30503,김성현
+30504,김우연
+30505,김준후
+30506,박규동
+30507,박재민
+30508,성건오
+30509,안의진
+30510,윤승현
+30511,정윤교
+30512,차주영
+30513,곽민서
+30601,강재현
+30602,김신엽
+30603,김영효
+30604,박건우
+30605,박재현
+30606,서동현
+30607,서수민
+30608,윤시후
+30609,이수혁
+30610,장승모
+30611,장우석
+30612,정주원
+30701,강정헌
+30702,권민재
+30703,김민서
+30704,김윤건
+30705,박석현
+30706,박세환
+30707,박준서
+30708,옥태산
+30709,이재원
+30710,이태윤
+30711,임성빈
+30712,조남훈 `;
 
         const studentDB = {};
         rawStudentData.trim().split('\n').forEach(line => {
@@ -356,16 +544,13 @@
             lucide.createIcons();
             window.renderCalendar();
             
-            // 인증 진행
+            // 로그인 인증 시도 (비밀번호 없는 익명 로그인)
             try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
+                await signInAnonymously(auth);
             } catch (error) {
-                console.error("인증 에러:", error);
-                document.getElementById('cloudStatusText').textContent = "오프라인 모드 🔴";
+                console.error("Firebase 인증 에러:", error);
+                document.getElementById('cloudStatusText').textContent = "오프라인 모드 🔴 (인증 오류)";
+                alert("데이터베이스 접속 오류!\nFirebase 콘솔에서 [Authentication] -> [Sign-in method] -> [익명(Anonymous)] 로그인이 '사용 설정' 되어 있는지 확인해주세요!");
             }
         };
 
@@ -374,17 +559,17 @@
             if (user) {
                 document.getElementById('cloudStatusText').textContent = "🟢 실시간 동기화 켜짐";
                 
-                // Firestore의 공유 컬렉션 (모든 접속자가 같은 데이터를 봅니다)
-                const collRef = collection(db, 'artifacts', appId, 'public', 'data', 'holiday_attendance');
+                // Firestore 저장 폴더 이름: 선생님께서 찾기 쉽게 'holiday_attendance' 로 지정했습니다.
+                const collRef = collection(db, 'holiday_attendance');
                 
-                // 입력 즉시, 혹은 다른 담당자가 입력 즉시 호출됨
+                // 데이터 변경 감지 (누군가 입력하면 즉시 화면에 반영)
                 onSnapshot(collRef, (snapshot) => {
                     attendanceData = [];
                     snapshot.forEach(doc => {
                         attendanceData.push({ dbId: doc.id, ...doc.data() });
                     });
                     
-                    // 최신 입력순으로 정렬
+                    // 최신 입력순 정렬
                     attendanceData.sort((a, b) => b.timestamp - a.timestamp);
                     
                     // 화면 자동 업데이트
@@ -392,14 +577,14 @@
                     window.renderStats();
                 }, (error) => {
                     console.error("데이터 읽기 에러:", error);
+                    alert("데이터를 읽어올 권한이 없습니다.\nFirebase 콘솔에서 [Firestore Database] -> [규칙(Rules)] 이 테스트 모드(allow read, write;)로 되어 있는지 확인해주세요!");
                 });
             }
         });
 
         // ==========================================
-        // 5. 로직 함수 (html 속성 호출을 위해 window 객체에 할당)
+        // 5. 로직 함수 (UI 관련)
         // ==========================================
-        
         window.changeMonth = (delta) => {
             calCurrentDate.setMonth(calCurrentDate.getMonth() + delta);
             window.renderCalendar();
@@ -514,7 +699,9 @@
             }
         };
 
-        // 클라우드(Firestore)에 데이터 저장!
+        // ==========================================
+        // ☁️ 6. 클라우드(Firestore) 데이터 등록 / 삭제
+        // ==========================================
         window.addRecord = async (event) => {
             event.preventDefault();
             const inputId = document.getElementById('inputId').value.trim();
@@ -528,7 +715,7 @@
             const displayDate = `${y}-${m}-${d}(${dayStr})`;
 
             const record = {
-                timestamp: Date.now(), // 정렬을 위해 저장
+                timestamp: Date.now(), // 최신순 정렬을 위한 타임스탬프
                 round: currentRound,
                 date: displayDate,
                 studentId: inputId,
@@ -536,11 +723,11 @@
             };
 
             try {
-                // Firebase Firestore에 새 문서 추가 (입력 즉시 업로드)
-                const docRef = doc(collection(db, 'artifacts', appId, 'public', 'data', 'holiday_attendance'));
+                // 입력 즉시 클라우드 업로드!
+                const docRef = doc(collection(db, 'holiday_attendance'));
                 await setDoc(docRef, record);
 
-                // UI 리셋 효과
+                // UI 리셋
                 document.getElementById('inputId').value = "";
                 window.checkStudentId();
                 
@@ -558,29 +745,31 @@
                 }, 500);
 
             } catch (error) {
-                alert("클라우드 저장 중 에러가 발생했습니다.");
+                alert("서버 전송 실패. 인터넷 연결을 확인해주세요.");
                 console.error(error);
             }
         };
 
-        // 클라우드(Firestore)에서 데이터 삭제!
         window.deleteRecord = async (dbId) => {
-            if (confirm('이 기록을 클라우드에서 완전히 삭제하시겠습니까?')) {
+            if (confirm('클라우드 서버에서 완전히 삭제하시겠습니까? (복구 불가)')) {
                 try {
-                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'holiday_attendance', dbId));
+                    await deleteDoc(doc(db, 'holiday_attendance', dbId));
                 } catch (error) {
-                    alert("삭제 중 에러가 발생했습니다.");
+                    alert("삭제 중 권한 문제가 발생했습니다.");
                 }
             }
         };
 
+        // ==========================================
+        // 7. 화면 리스트 및 통계 렌더링
+        // ==========================================
         window.renderInputList = () => {
             const tbody = document.getElementById('attendanceList');
             document.getElementById('totalRecordsCount').textContent = `총 ${attendanceData.length}건`;
             tbody.innerHTML = "";
 
             if (attendanceData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="py-32 text-center text-slate-300 font-bold">등록된 기록이 없습니다.<br><span class="text-xs font-normal">달력에서 날짜를 선택하고 학번을 입력하세요.</span></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="py-32 text-center text-slate-300 font-bold">등록된 기록이 없습니다.<br><span class="text-xs font-normal">데이터를 입력하면 실시간으로 저장됩니다.</span></td></tr>`;
                 return;
             }
 
