@@ -146,12 +146,20 @@
                 <!-- 상단 타이틀 및 내보내기 -->
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
-                        <h2 class="text-2xl font-black text-slate-900">전체 자습 참여 누적 통계</h2>
-                        <p class="text-slate-500 text-sm font-bold">휴일에 등교한 학생들의 전체 누적 참여 횟수입니다.</p>
+                        <h2 class="text-2xl font-black text-slate-900" id="statsTitle">전체 자습 참여 누적 통계</h2>
+                        <p class="text-slate-500 text-sm font-bold">휴일에 등교한 학생들의 기간별 누적 참여 횟수입니다.</p>
                     </div>
                     
-                    <div class="flex justify-end">
-                        <button onclick="window.exportToExcel()" class="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-black shadow-md hover:bg-emerald-700 transition-all active:scale-95">
+                    <div class="flex flex-col sm:flex-row items-center gap-3">
+                        <div class="flex flex-wrap bg-white p-1 rounded-xl shadow-sm border border-slate-200" id="filterButtons">
+                            <button onclick="window.setFilter('all')" id="filter-all" class="filter-btn px-4 py-2 rounded-lg text-xs font-black transition-all bg-indigo-600 text-white shadow-md">통합 누적</button>
+                            <button onclick="window.setFilter(1)" id="filter-1" class="filter-btn px-4 py-2 rounded-lg text-xs font-black transition-all text-slate-500 hover:bg-slate-50">1회차</button>
+                            <button onclick="window.setFilter(2)" id="filter-2" class="filter-btn px-4 py-2 rounded-lg text-xs font-black transition-all text-slate-500 hover:bg-slate-50">2회차</button>
+                            <button onclick="window.setFilter(3)" id="filter-3" class="filter-btn px-4 py-2 rounded-lg text-xs font-black transition-all text-slate-500 hover:bg-slate-50">3회차</button>
+                            <button onclick="window.setFilter(4)" id="filter-4" class="filter-btn px-4 py-2 rounded-lg text-xs font-black transition-all text-slate-500 hover:bg-slate-50">4회차</button>
+                        </div>
+
+                        <button onclick="window.exportToExcel()" class="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-black shadow-md hover:bg-emerald-700 transition-all active:scale-95 whitespace-nowrap">
                             <i data-lucide="table" class="w-4 h-4"></i> 통계표(엑셀) 저장
                         </button>
                     </div>
@@ -299,7 +307,7 @@
 10415,이정우
 10416,전성우
 10417,황현승
-10419,유지한
+10418,유지한
 10501,강규현
 10502,강민성
 10503,김대영
@@ -526,8 +534,9 @@
         });
 
         // ==========================================
-        // 3. 전역 상태 (차수 개념 제거)
+        // 3. 전역 상태
         // ==========================================
+        let statsFilter = 'all';
         let attendanceData = [];
         let currentFoundName = "";
         
@@ -648,6 +657,37 @@
             if (tab === 'stats') window.renderStats();
         };
 
+        // 날짜를 입력받아 자동으로 회차(1~4)를 계산하는 함수
+        window.getRound = (dateStr) => {
+            if (!dateStr) return 0;
+            const parts = dateStr.split('-');
+            if (parts.length < 3) return 0;
+            const m = parseInt(parts[1], 10);
+            const d = parseInt(parts[2], 10);
+            const val = m * 100 + d; 
+            
+            if (val >= 309 && val <= 424) return 1; 
+            if (val >= 501 && val <= 715) return 2; 
+            if (val >= 818 && val <= 1008) return 3; 
+            if (val >= 1016 && val <= 1228) return 4; 
+            return 0; 
+        };
+
+        window.setFilter = (filter) => {
+            statsFilter = filter;
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => {
+                btn.className = "filter-btn px-3 py-2 rounded-lg text-xs font-black transition-all text-slate-500 hover:bg-slate-50";
+            });
+            const activeBtn = document.getElementById(`filter-${filter}`);
+            if(filter === 'all') {
+                activeBtn.className = "filter-btn px-4 py-2 rounded-lg text-xs font-black transition-all bg-indigo-600 text-white shadow-md";
+            } else {
+                activeBtn.className = "filter-btn px-3 py-2 rounded-lg text-xs font-black transition-all bg-indigo-600 text-white shadow-md";
+            }
+            window.renderStats();
+        };
+
         window.checkStudentId = () => {
             const inputId = document.getElementById('inputId').value.trim();
             const displayName = document.getElementById('displayName');
@@ -681,10 +721,13 @@
             const d = String(calSelectedDate.getDate()).padStart(2, '0');
             const days = ['일', '월', '화', '수', '목', '금', '토'];
             const dayStr = days[calSelectedDate.getDay()];
-            const displayDate = `${y}-${m}-${d}(${dayStr})`;
+            
+            const rawDate = `${y}-${m}-${d}`;
+            const displayDate = `${rawDate}(${dayStr})`;
 
             const record = {
                 timestamp: Date.now(),
+                rawDate: rawDate,
                 date: displayDate,
                 studentId: inputId,
                 name: currentFoundName
@@ -758,8 +801,12 @@
         };
 
         window.renderStats = () => {
+            const filteredData = statsFilter === 'all' 
+                ? attendanceData 
+                : attendanceData.filter(a => window.getRound(a.rawDate || a.date.substring(0, 10)) === statsFilter);
+
             const counts = {};
-            attendanceData.forEach(item => {
+            filteredData.forEach(item => {
                 if (!counts[item.studentId]) {
                     counts[item.studentId] = { id: item.studentId, name: item.name, count: 0 };
                 }
@@ -769,7 +816,9 @@
             const sortedStats = Object.values(counts).sort((a, b) => b.count - a.count);
             const topCount = sortedStats.length > 0 ? sortedStats[0].count : 1; 
 
-            document.getElementById('statTotalCount').textContent = attendanceData.length;
+            const titlePrefix = statsFilter === 'all' ? '전체 통합' : `${statsFilter}회차`;
+            document.getElementById('statsTitle').textContent = `${titlePrefix} 자습 참여 통계`;
+            document.getElementById('statTotalCount').textContent = filteredData.length;
             
             if (sortedStats.length > 0) {
                 document.getElementById('statTopName').textContent = sortedStats[0].name;
@@ -825,13 +874,17 @@
         };
 
         window.exportToExcel = () => {
-            if (attendanceData.length === 0) {
+            const filteredData = statsFilter === 'all' 
+                ? attendanceData 
+                : attendanceData.filter(a => window.getRound(a.rawDate || a.date.substring(0, 10)) === statsFilter);
+
+            if (filteredData.length === 0) {
                 alert("내보낼 통계 데이터가 없습니다.");
                 return;
             }
 
             const counts = {};
-            attendanceData.forEach(item => {
+            filteredData.forEach(item => {
                 if (!counts[item.studentId]) {
                     counts[item.studentId] = { id: item.studentId, name: item.name, count: 0 };
                 }
@@ -851,8 +904,10 @@
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             
+            const fileName = statsFilter === 'all' ? '휴일_자습_전체누적통계.csv' : `휴일_자습_${statsFilter}회차_누적통계.csv`;
+            
             link.setAttribute('href', url);
-            link.setAttribute('download', '휴일_자습_전체누적통계.csv');
+            link.setAttribute('download', fileName);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
